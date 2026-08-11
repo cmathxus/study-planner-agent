@@ -1,0 +1,25 @@
+@StudyPlannerAgent.Api_HostAddress = http://localhost:5090
+
+GET {{StudyPlannerAgent.Api_HostAddress}}/study-plan/today
+Accept: application/json
+
+###
+
+GET {{StudyPlannerAgent.Api_HostAddress}}/study-plan/week
+Accept: application/json
+
+###
+
+POST {{StudyPlannerAgent.Api_HostAddress}}/progress
+Content-Type: application/json
+
+{
+  "topic_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
+  "percentage": 20,
+  "notes": "Revisei LINQ e async/await."
+}
+
+###
+
+GET {{StudyPlannerAgent.Api_HostAddress}}/progress/summary
+Accept: application/json
