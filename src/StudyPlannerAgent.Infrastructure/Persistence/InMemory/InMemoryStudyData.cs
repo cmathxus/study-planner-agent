@@ -34,4 +34,5 @@ public sealed class InMemoryStudyData
     public List<StudyTopic> StudyTopics { get; } = [];
     public List<StudySchedule> StudySchedules { get; } = [];
     public List<StudyProgressEntry> StudyProgressEntries { get; } = [];
+    public List<User> Users { get; } = [];
 }

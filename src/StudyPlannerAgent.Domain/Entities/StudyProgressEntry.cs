@@ -7,12 +7,14 @@ public sealed class StudyProgressEntry
 {
     private StudyProgressEntry(
         Guid id,
+        Guid userId,
         Guid studyTopicId,
         DateOnly studiedOn,
         ProgressPercentage percentage,
         string? notes)
     {
         Id = id;
+        UserId = userId;
         StudyTopicId = studyTopicId;
         StudiedOn = studiedOn;
         Percentage = percentage;
@@ -20,6 +22,7 @@ public sealed class StudyProgressEntry
     }
 
     public Guid Id { get; }
+    public Guid UserId { get; }
     public Guid StudyTopicId { get; }
     public DateOnly StudiedOn { get; }
     public ProgressPercentage Percentage { get; }
@@ -27,6 +30,7 @@ public sealed class StudyProgressEntry
 
     public static Result<StudyProgressEntry> Create(
         Guid id,
+        Guid userId,
         Guid studyTopicId,
         DateOnly studiedOn,
         int percentage,
@@ -38,12 +42,15 @@ public sealed class StudyProgressEntry
         if (studyTopicId == Guid.Empty)
             return Result<StudyProgressEntry>.Failure(new Error("StudyProgress.EmptyTopicId", "Study topic id cannot be empty."));
 
+        if (userId == Guid.Empty)
+            return Result<StudyProgressEntry>.Failure(new Error("StudyProgress.EmptyUserId", "User id cannot be empty."));
+
         var progressPercentage = ProgressPercentage.Create(percentage);
 
         if (progressPercentage.IsFailure)
             return Result<StudyProgressEntry>.Failure(progressPercentage.Error);
 
         return Result<StudyProgressEntry>.Success(
-            new StudyProgressEntry(id, studyTopicId, studiedOn, progressPercentage.Value, notes?.Trim()));
+            new StudyProgressEntry(id, userId, studyTopicId, studiedOn, progressPercentage.Value, notes?.Trim()));
     }
 }

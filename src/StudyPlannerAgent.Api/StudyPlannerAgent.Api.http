@@ -1,16 +1,40 @@
 @StudyPlannerAgent.Api_HostAddress = http://localhost:5090
 
+### Register
+# @name register
+POST {{StudyPlannerAgent.Api_HostAddress}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Caio Matheus",
+  "email": "caio@example.com",
+  "password": "password123"
+}
+
+###
+
+@token = {{register.response.body.$.access_token}}
+
+GET {{StudyPlannerAgent.Api_HostAddress}}/auth/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+
 GET {{StudyPlannerAgent.Api_HostAddress}}/study-plan/today
+Authorization: Bearer {{token}}
 Accept: application/json
 
 ###
 
 GET {{StudyPlannerAgent.Api_HostAddress}}/study-plan/week
+Authorization: Bearer {{token}}
 Accept: application/json
 
 ###
 
 POST {{StudyPlannerAgent.Api_HostAddress}}/progress
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -22,4 +46,5 @@ Content-Type: application/json
 ###
 
 GET {{StudyPlannerAgent.Api_HostAddress}}/progress/summary
+Authorization: Bearer {{token}}
 Accept: application/json

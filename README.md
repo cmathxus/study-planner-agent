@@ -26,10 +26,29 @@ dotnet run --project src/StudyPlannerAgent.Api/StudyPlannerAgent.Api.csproj --ur
 Endpoints iniciais:
 
 ```text
+POST /auth/register
+POST /auth/login
+GET  /auth/me
 GET  /study-plan/today
 GET  /study-plan/week
 POST /progress
 GET  /progress/summary
+```
+
+Os endpoints de estudo usam JWT. Primeiro registre ou faca login:
+
+```json
+{
+  "name": "Caio Matheus",
+  "email": "caio@example.com",
+  "password": "password123"
+}
+```
+
+Use o `access_token` retornado no header:
+
+```text
+Authorization: Bearer <access_token>
 ```
 
 Exemplo de progresso:
@@ -57,6 +76,8 @@ record_study_progress
 get_progress_summary
 ```
 
+As tools que consultam ou registram progresso recebem `userId` como parametro.
+
 ## Supabase
 
 Por padrao, o projeto usa dados em memoria. Para usar Supabase/Postgres:
@@ -73,7 +94,13 @@ database/schema.sql
 $env:ConnectionStrings__Supabase="postgresql://postgres:<password>@<host>:5432/postgres"
 ```
 
-3. Rode a API ou o MCP Server normalmente.
+3. Configure uma chave JWT fora do Git para deploy:
+
+```powershell
+$env:Jwt__Secret="use-uma-chave-grande-e-segura-aqui"
+```
+
+4. Rode a API ou o MCP Server normalmente.
 
 Se `ConnectionStrings__Supabase` nao existir, o projeto volta para os repositorios em memoria.
 
@@ -85,6 +112,8 @@ Se `ConnectionStrings__Supabase` nao existir, o projeto volta para os repositori
 - Repository Pattern: persistencia fica atras de interfaces.
 - Value Object: `ProgressPercentage` valida a regra de progresso minimo.
 - Ports and Adapters: REST API e MCP Server sao portas diferentes usando a mesma aplicacao.
+- JWT Authentication: usuarios fazem login e recebem token para acessar recursos protegidos.
+- Password Hashing: senhas sao armazenadas com hash BCrypt.
 
 ## Proximo passo
 

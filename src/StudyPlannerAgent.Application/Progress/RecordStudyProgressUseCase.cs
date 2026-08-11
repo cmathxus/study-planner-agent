@@ -20,7 +20,7 @@ public sealed class RecordStudyProgressUseCase
         _topicRepository = topicRepository;
     }
 
-    public async Task<Result> ExecuteAsync(RecordProgressRequest request, CancellationToken cancellationToken)
+    public async Task<Result> ExecuteAsync(Guid userId, RecordProgressRequest request, CancellationToken cancellationToken)
     {
         var topic = await _topicRepository.GetByIdAsync(request.TopicId, cancellationToken);
 
@@ -29,6 +29,7 @@ public sealed class RecordStudyProgressUseCase
 
         var progressEntry = StudyProgressEntry.Create(
             Guid.NewGuid(),
+            userId,
             request.TopicId,
             _clock.Today,
             request.Percentage,

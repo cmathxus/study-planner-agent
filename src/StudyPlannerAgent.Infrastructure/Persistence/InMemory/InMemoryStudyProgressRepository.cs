@@ -19,15 +19,19 @@ public sealed class InMemoryStudyProgressRepository : IStudyProgressRepository
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyCollection<StudyProgressEntry>> GetAllAsync(CancellationToken cancellationToken)
-    {
-        return Task.FromResult<IReadOnlyCollection<StudyProgressEntry>>(_data.StudyProgressEntries);
-    }
-
-    public Task<IReadOnlyCollection<StudyProgressEntry>> GetByTopicIdAsync(Guid topicId, CancellationToken cancellationToken)
+    public Task<IReadOnlyCollection<StudyProgressEntry>> GetAllByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var entries = _data.StudyProgressEntries
-            .Where(entry => entry.StudyTopicId == topicId)
+            .Where(entry => entry.UserId == userId)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyCollection<StudyProgressEntry>>(entries);
+    }
+
+    public Task<IReadOnlyCollection<StudyProgressEntry>> GetByUserIdAndTopicIdAsync(Guid userId, Guid topicId, CancellationToken cancellationToken)
+    {
+        var entries = _data.StudyProgressEntries
+            .Where(entry => entry.UserId == userId && entry.StudyTopicId == topicId)
             .ToList();
 
         return Task.FromResult<IReadOnlyCollection<StudyProgressEntry>>(entries);

@@ -27,9 +27,9 @@ public sealed class StudyPlannerTools
 
     [McpServerTool]
     [Description("Returns today's study plan with current progress for each scheduled topic.")]
-    public async Task<object> GetTodayStudyPlan(CancellationToken cancellationToken)
+    public async Task<object> GetTodayStudyPlan(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await _getTodayStudyPlanUseCase.ExecuteAsync(cancellationToken);
+        var result = await _getTodayStudyPlanUseCase.ExecuteAsync(userId, cancellationToken);
 
         return result.IsSuccess ? result.Value : result.Error;
     }
@@ -45,9 +45,10 @@ public sealed class StudyPlannerTools
 
     [McpServerTool]
     [Description("Records a study progress entry. The percentage must be at least 20.")]
-    public async Task<object> RecordStudyProgress(Guid topicId, int percentage, string? notes, CancellationToken cancellationToken)
+    public async Task<object> RecordStudyProgress(Guid userId, Guid topicId, int percentage, string? notes, CancellationToken cancellationToken)
     {
         var result = await _recordStudyProgressUseCase.ExecuteAsync(
+            userId,
             new RecordProgressRequest(topicId, percentage, notes),
             cancellationToken);
 
@@ -56,9 +57,9 @@ public sealed class StudyPlannerTools
 
     [McpServerTool]
     [Description("Returns a progress summary grouped by study topic.")]
-    public async Task<object> GetProgressSummary(CancellationToken cancellationToken)
+    public async Task<object> GetProgressSummary(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await _getProgressSummaryUseCase.ExecuteAsync(cancellationToken);
+        var result = await _getProgressSummaryUseCase.ExecuteAsync(userId, cancellationToken);
 
         return result.IsSuccess ? result.Value : result.Error;
     }

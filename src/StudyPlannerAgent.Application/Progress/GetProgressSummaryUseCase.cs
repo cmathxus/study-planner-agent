@@ -16,10 +16,10 @@ public sealed class GetProgressSummaryUseCase
         _topicRepository = topicRepository;
     }
 
-    public async Task<Result<IReadOnlyCollection<ProgressSummaryItemResponse>>> ExecuteAsync(CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<ProgressSummaryItemResponse>>> ExecuteAsync(Guid userId, CancellationToken cancellationToken)
     {
         var topics = await _topicRepository.GetAllAsync(cancellationToken);
-        var progressEntries = await _progressRepository.GetAllAsync(cancellationToken);
+        var progressEntries = await _progressRepository.GetAllByUserIdAsync(userId, cancellationToken);
 
         var summary = topics
             .Select(topic =>

@@ -1,3 +1,14 @@
+create table if not exists users (
+    id uuid primary key,
+    name text not null,
+    email text not null,
+    normalized_email text not null,
+    password_hash text not null,
+    created_at timestamptz not null default now()
+);
+
+create unique index if not exists ux_users_normalized_email on users(normalized_email);
+
 create table if not exists study_topics (
     id uuid primary key,
     name text not null,
@@ -12,12 +23,25 @@ create table if not exists study_schedules (
 
 create table if not exists study_progress_entries (
     id uuid primary key,
+    user_id uuid not null references users(id) on delete cascade,
     study_topic_id uuid not null references study_topics(id) on delete cascade,
     studied_on date not null,
     percentage integer not null check (percentage between 20 and 100),
     notes text null,
     created_at timestamptz not null default now()
 );
+
+alter table study_progress_entries
+add column if not exists user_id uuid null;
+
+do $$
+begin
+    alter table study_progress_entries
+    add constraint fk_study_progress_entries_users
+    foreign key (user_id) references users(id) on delete cascade;
+exception
+    when duplicate_object then null;
+end $$;
 
 insert into study_topics (id, name, description)
 values

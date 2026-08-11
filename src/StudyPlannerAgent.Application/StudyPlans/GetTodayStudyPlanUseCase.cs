@@ -22,7 +22,7 @@ public sealed class GetTodayStudyPlanUseCase
         _topicRepository = topicRepository;
     }
 
-    public async Task<Result<IReadOnlyCollection<StudyPlanItemResponse>>> ExecuteAsync(CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<StudyPlanItemResponse>>> ExecuteAsync(Guid userId, CancellationToken cancellationToken)
     {
         var schedules = await _scheduleRepository.GetByWeekdayAsync(_clock.Today.DayOfWeek, cancellationToken);
         var items = new List<StudyPlanItemResponse>();
@@ -34,7 +34,7 @@ public sealed class GetTodayStudyPlanUseCase
             if (topic is null)
                 continue;
 
-            var progress = await _progressRepository.GetByTopicIdAsync(topic.Id, cancellationToken);
+            var progress = await _progressRepository.GetByUserIdAndTopicIdAsync(userId, topic.Id, cancellationToken);
             var currentProgress = Math.Min(100, progress.Sum(entry => entry.Percentage.Value));
 
             items.Add(new StudyPlanItemResponse(
