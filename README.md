@@ -57,6 +57,26 @@ record_study_progress
 get_progress_summary
 ```
 
+## Supabase
+
+Por padrao, o projeto usa dados em memoria. Para usar Supabase/Postgres:
+
+1. Rode o script no SQL Editor do Supabase:
+
+```text
+database/schema.sql
+```
+
+2. Configure a connection string fora do Git:
+
+```powershell
+$env:ConnectionStrings__Supabase="postgresql://postgres:<password>@<host>:5432/postgres"
+```
+
+3. Rode a API ou o MCP Server normalmente.
+
+Se `ConnectionStrings__Supabase` nao existir, o projeto volta para os repositorios em memoria.
+
 ## Padroes usados
 
 - Clean Architecture: separa dominio, casos de uso, infraestrutura e entradas externas.
@@ -68,4 +88,4 @@ get_progress_summary
 
 ## Proximo passo
 
-Trocar os repositorios em memoria por adapters usando Supabase/Postgres.
+Adicionar migrations automatizadas e testes de integracao.
