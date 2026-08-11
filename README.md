@@ -78,31 +78,28 @@ get_progress_summary
 
 As tools que consultam ou registram progresso recebem `userId` como parametro.
 
-## Supabase
+## Supabase + EF Core
 
 Por padrao, o projeto usa dados em memoria. Para usar Supabase/Postgres:
 
-1. Rode o script no SQL Editor do Supabase:
-
-```text
-database/schema.sql
-```
-
-2. Configure a connection string fora do Git:
+1. Configure a connection string fora do Git:
 
 ```powershell
 $env:ConnectionStrings__Supabase="postgresql://postgres:<password>@<host>:5432/postgres"
 ```
 
-3. Configure uma chave JWT fora do Git para deploy:
+2. Configure uma chave JWT fora do Git para deploy:
 
 ```powershell
 $env:Jwt__Secret="use-uma-chave-grande-e-segura-aqui"
 ```
 
-4. Rode a API ou o MCP Server normalmente.
+3. Rode a API ou o MCP Server normalmente.
 
+O EF Core aplica as migrations automaticamente quando a connection string existe.
 Se `ConnectionStrings__Supabase` nao existir, o projeto volta para os repositorios em memoria.
+
+Se voce ja criou as tabelas antigas manualmente no Supabase, limpe essas tabelas antes de rodar a API com EF Core.
 
 ## Padroes usados
 
@@ -110,6 +107,7 @@ Se `ConnectionStrings__Supabase` nao existir, o projeto volta para os repositori
 - SOLID: os casos de uso dependem de interfaces, nao de banco ou framework.
 - Result Pattern: erros esperados voltam como resultado, sem usar exception para fluxo comum.
 - Repository Pattern: persistencia fica atras de interfaces.
+- EF Core: mapeia as entidades de persistencia para Postgres/Supabase sem SQL na mao.
 - Value Object: `ProgressPercentage` valida a regra de progresso minimo.
 - Ports and Adapters: REST API e MCP Server sao portas diferentes usando a mesma aplicacao.
 - JWT Authentication: usuarios fazem login e recebem token para acessar recursos protegidos.
@@ -117,4 +115,4 @@ Se `ConnectionStrings__Supabase` nao existir, o projeto volta para os repositori
 
 ## Proximo passo
 
-Adicionar migrations automatizadas e testes de integracao.
+Adicionar testes de integracao.

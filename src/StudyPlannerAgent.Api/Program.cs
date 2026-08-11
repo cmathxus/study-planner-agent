@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Npgsql;
 using StudyPlannerAgent.Application.Abstractions;
 using StudyPlannerAgent.Application.Auth;
 using StudyPlannerAgent.Application.Progress;
@@ -9,8 +9,8 @@ using StudyPlannerAgent.Application.StudyPlans;
 using StudyPlannerAgent.Domain.Common;
 using StudyPlannerAgent.Infrastructure.Auth;
 using StudyPlannerAgent.Infrastructure.Clock;
+using StudyPlannerAgent.Infrastructure.Persistence.EfCore;
 using StudyPlannerAgent.Infrastructure.Persistence.InMemory;
-using StudyPlannerAgent.Infrastructure.Persistence.Postgres;
 using System.Security.Claims;
 using System.Text;
 
@@ -58,11 +58,15 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 else
 {
-    builder.Services.AddSingleton(_ => NpgsqlDataSource.Create(connectionString));
-    builder.Services.AddScoped<IStudyTopicRepository, PostgresStudyTopicRepository>();
-    builder.Services.AddScoped<IStudyScheduleRepository, PostgresStudyScheduleRepository>();
-    builder.Services.AddScoped<IStudyProgressRepository, PostgresStudyProgressRepository>();
-    builder.Services.AddScoped<IUserRepository, PostgresUserRepository>();
+    builder.Services.AddDbContext<StudyPlannerDbContext>(options =>
+    {
+        options.UseNpgsql(connectionString);
+    });
+
+    builder.Services.AddScoped<IStudyTopicRepository, EfStudyTopicRepository>();
+    builder.Services.AddScoped<IStudyScheduleRepository, EfStudyScheduleRepository>();
+    builder.Services.AddScoped<IStudyProgressRepository, EfStudyProgressRepository>();
+    builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 }
 
 builder.Services
@@ -89,6 +93,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 var app = builder.Build();
+
+if (!string.IsNullOrWhiteSpace(connectionString))
+{
+    await StudyPlannerDbInitializer.ApplyMigrationsAsync(app.Services);
+}
 
 if (app.Environment.IsDevelopment())
 {

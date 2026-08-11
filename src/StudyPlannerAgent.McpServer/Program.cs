@@ -1,10 +1,10 @@
-using Npgsql;
+using Microsoft.EntityFrameworkCore;
 using StudyPlannerAgent.Application.Abstractions;
 using StudyPlannerAgent.Application.Progress;
 using StudyPlannerAgent.Application.StudyPlans;
 using StudyPlannerAgent.Infrastructure.Clock;
+using StudyPlannerAgent.Infrastructure.Persistence.EfCore;
 using StudyPlannerAgent.Infrastructure.Persistence.InMemory;
-using StudyPlannerAgent.Infrastructure.Persistence.Postgres;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,10 +26,14 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 else
 {
-    builder.Services.AddSingleton(_ => NpgsqlDataSource.Create(connectionString));
-    builder.Services.AddScoped<IStudyTopicRepository, PostgresStudyTopicRepository>();
-    builder.Services.AddScoped<IStudyScheduleRepository, PostgresStudyScheduleRepository>();
-    builder.Services.AddScoped<IStudyProgressRepository, PostgresStudyProgressRepository>();
+    builder.Services.AddDbContext<StudyPlannerDbContext>(options =>
+    {
+        options.UseNpgsql(connectionString);
+    });
+
+    builder.Services.AddScoped<IStudyTopicRepository, EfStudyTopicRepository>();
+    builder.Services.AddScoped<IStudyScheduleRepository, EfStudyScheduleRepository>();
+    builder.Services.AddScoped<IStudyProgressRepository, EfStudyProgressRepository>();
 }
 
 builder.Services
@@ -41,6 +45,11 @@ builder.Services
     .WithTools<StudyPlannerAgent.McpServer.Tools.StudyPlannerTools>();
 
 var app = builder.Build();
+
+if (!string.IsNullOrWhiteSpace(connectionString))
+{
+    await StudyPlannerDbInitializer.ApplyMigrationsAsync(app.Services);
+}
 
 app.MapMcp();
 

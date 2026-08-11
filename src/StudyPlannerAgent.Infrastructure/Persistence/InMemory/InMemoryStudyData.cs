@@ -11,7 +11,7 @@ public sealed class InMemoryStudyData
             StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"), "C# fundamentals", "Review syntax, records, LINQ and async/await.").Value,
             StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"), "ASP.NET Core", "Practice controllers, minimal APIs, dependency injection and middleware.").Value,
             StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"), "Clean Architecture", "Review domain, application, infrastructure and API boundaries.").Value,
-            StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"), "Supabase/Postgres", "Practice tables, SQL queries and repository adapters.").Value,
+            StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4"), "Supabase/Postgres", "Practice tables, EF Core mappings and repository adapters.").Value,
             StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5"), "MCP and Foundry", "Study tools, MCP server transport and agent integration.").Value,
             StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa6"), "Project practice", "Build small features and write notes about tradeoffs.").Value,
             StudyTopic.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa7"), "Weekly review", "Review progress, gaps and next week's focus.").Value
