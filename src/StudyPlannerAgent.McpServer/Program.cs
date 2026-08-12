@@ -60,6 +60,8 @@ if (!string.IsNullOrWhiteSpace(normalizedConnectionString))
     await StudyPlannerDbInitializer.ApplyMigrationsAsync(app.Services);
 }
 
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+
 app.MapMcp();
 
 app.Run();

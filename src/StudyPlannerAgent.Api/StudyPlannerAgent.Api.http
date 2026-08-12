@@ -21,6 +21,17 @@ Accept: application/json
 
 ###
 
+POST {{StudyPlannerAgent.Api_HostAddress}}/chat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "message": "Cria um topico de Docker para sexta-feira",
+  "thread_id": null
+}
+
+###
+
 GET {{StudyPlannerAgent.Api_HostAddress}}/study-plan/today
 Authorization: Bearer {{token}}
 Accept: application/json

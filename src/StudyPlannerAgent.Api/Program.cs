@@ -6,12 +6,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StudyPlannerAgent.Application.Abstractions;
 using StudyPlannerAgent.Application.Auth;
+using StudyPlannerAgent.Application.Chat;
 using StudyPlannerAgent.Application.Progress;
 using StudyPlannerAgent.Application.StudyPlans;
 using StudyPlannerAgent.Application.StudyTopics;
 using StudyPlannerAgent.Domain.Common;
 using StudyPlannerAgent.Infrastructure.Auth;
 using StudyPlannerAgent.Infrastructure.Clock;
+using StudyPlannerAgent.Infrastructure.Foundry;
 using StudyPlannerAgent.Infrastructure.Persistence.EfCore;
 using StudyPlannerAgent.Infrastructure.Persistence.InMemory;
 using System.Security.Claims;
@@ -39,6 +41,7 @@ if (string.IsNullOrWhiteSpace(jwtOptions.Secret))
 
 builder.Services.AddScoped<GetTodayStudyPlanUseCase>();
 builder.Services.AddScoped<GetWeeklyStudyScheduleUseCase>();
+builder.Services.AddScoped<SendChatMessageUseCase>();
 builder.Services.AddScoped<GetStudyTopicsUseCase>();
 builder.Services.AddScoped<GetStudyTopicByIdUseCase>();
 builder.Services.AddScoped<CreateStudyTopicUseCase>();
@@ -53,6 +56,17 @@ builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton(jwtOptions);
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+
+var foundryOptions = builder.Configuration
+    .GetSection(FoundryAgentOptions.SectionName)
+    .Get<FoundryAgentOptions>() ?? new FoundryAgentOptions();
+
+builder.Services.AddSingleton(foundryOptions);
+
+if (string.IsNullOrWhiteSpace(foundryOptions.Endpoint) || string.IsNullOrWhiteSpace(foundryOptions.AgentId))
+    builder.Services.AddSingleton<IChatAgentClient, DisabledChatAgentClient>();
+else
+    builder.Services.AddSingleton<IChatAgentClient, FoundryChatAgentClient>();
 
 var connectionString = builder.Configuration.GetConnectionString("Supabase");
 var normalizedConnectionString = string.IsNullOrWhiteSpace(connectionString)
@@ -188,6 +202,22 @@ auth.MapGet("/me", (ClaimsPrincipal user) =>
         name = user.FindFirst(ClaimTypes.Name)?.Value,
         email = user.FindFirst(ClaimTypes.Email)?.Value
     });
+}).RequireAuthorization();
+
+app.MapPost("/chat", async (
+    ClaimsPrincipal user,
+    ChatRequest request,
+    SendChatMessageUseCase useCase,
+    CancellationToken cancellationToken) =>
+{
+    var userId = GetUserId(user);
+
+    if (userId.IsFailure)
+        return ToNoContentResult(userId);
+
+    var result = await useCase.ExecuteAsync(userId.Value, request, cancellationToken);
+
+    return ToOkResult(result);
 }).RequireAuthorization();
 
 var studyPlan = app.MapGroup("/study-plan").RequireAuthorization();

@@ -35,6 +35,7 @@ Endpoints iniciais:
 POST /auth/register
 POST /auth/login
 GET  /auth/me
+POST /chat
 GET  /study-topics
 GET  /study-topics/{id}
 POST /study-topics
@@ -84,6 +85,36 @@ Exemplo de progresso:
 }
 ```
 
+Exemplo de chat:
+
+```json
+{
+  "message": "Cria um topico de Docker para sexta-feira",
+  "thread_id": null
+}
+```
+
+Use o `thread_id` retornado para continuar a mesma conversa.
+
+## Microsoft Foundry Agent
+
+O endpoint `/chat` chama um agente do Microsoft Foundry usando `DefaultAzureCredential`.
+Localmente, faca login no Azure CLI:
+
+```powershell
+az login
+```
+
+Configure fora do Git:
+
+```powershell
+$env:Foundry__Endpoint="https://study-agent-mcp.services.ai.azure.com/"
+$env:Foundry__AgentId="<agent-id>"
+```
+
+O `Foundry__Endpoint` e o endpoint do projeto/agente no Foundry. O `Foundry__AgentId`
+vem do agente criado no portal.
+
 ## Rodar MCP Server
 
 ```bash
@@ -106,6 +137,22 @@ get_progress_summary
 
 As tools recebem `userId` como parametro direto. Por enquanto, os topicos ainda sao globais,
 mas o contrato ja fica preparado para evoluir para topicos por usuario.
+
+### Docker do MCP Server
+
+Build usando a raiz do repositorio como contexto:
+
+```bash
+docker build -f src/StudyPlannerAgent.McpServer/Dockerfile -t study-planner-mcp .
+```
+
+Run local:
+
+```bash
+docker run --rm -p 5091:8080 \
+  -e ConnectionStrings__Supabase="postgresql://postgres:<password>@<host>:5432/postgres" \
+  study-planner-mcp
+```
 
 ## Supabase + EF Core
 
