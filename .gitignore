@@ -3,6 +3,6 @@ obj/
 .vs/
 .vscode/
 TestResults/
+.tmp/
 *.user
 *.suo
-
