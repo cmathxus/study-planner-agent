@@ -62,6 +62,6 @@ if (!string.IsNullOrWhiteSpace(normalizedConnectionString))
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
-app.MapMcp();
+app.MapMcp("/mcp");
 
 app.Run();

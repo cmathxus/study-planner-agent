@@ -154,6 +154,30 @@ docker run --rm -p 5091:8080 \
   study-planner-mcp
 ```
 
+Deploy no Azure Container Apps:
+
+```powershell
+$env:ConnectionStrings__Supabase="sua-connection-string-do-supabase"
+
+.\infra\azure\deploy-mcp-containerapp.ps1
+```
+
+O script cria:
+
+```text
+Resource Group
+Azure Container Registry
+Container Apps Environment
+Container App do MCP Server
+```
+
+Ao final, ele imprime:
+
+```text
+https://<container-app-fqdn>/health
+https://<container-app-fqdn>/mcp
+```
+
 ## Supabase + EF Core
 
 Por padrao, o projeto usa dados em memoria. Para usar Supabase/Postgres:
