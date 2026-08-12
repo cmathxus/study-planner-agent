@@ -16,6 +16,11 @@ if ([string]::IsNullOrWhiteSpace($env:ConnectionStrings__Supabase)) {
 
 $image = "${ImageName}:${ImageTag}"
 
+Write-Host "Registering Azure resource providers"
+az provider register --namespace Microsoft.App --wait --output none
+az provider register --namespace Microsoft.OperationalInsights --wait --output none
+az provider register --namespace Microsoft.ContainerRegistry --wait --output none
+
 Write-Host "Creating resource group: $ResourceGroup"
 az group create `
     --name $ResourceGroup `
