@@ -52,6 +52,7 @@ public sealed class StudyPlannerDbContext : DbContext
         {
             builder.ToTable("study_schedules");
             builder.HasKey(schedule => schedule.Id);
+            builder.HasIndex(schedule => schedule.StudyTopicId).IsUnique();
             builder.Property(schedule => schedule.Id).HasColumnName("id");
             builder.Property(schedule => schedule.StudyTopicId).HasColumnName("study_topic_id");
             builder.Property(schedule => schedule.Weekday).HasColumnName("weekday").HasConversion<int>().IsRequired();

@@ -35,6 +35,11 @@ Endpoints iniciais:
 POST /auth/register
 POST /auth/login
 GET  /auth/me
+GET  /study-topics
+GET  /study-topics/{id}
+POST /study-topics
+PUT  /study-topics/{id}
+DELETE /study-topics/{id}
 GET  /study-plan/today
 GET  /study-plan/week
 POST /progress
@@ -56,6 +61,18 @@ Use o `access_token` retornado no header:
 ```text
 Authorization: Bearer <access_token>
 ```
+
+Exemplo de topico:
+
+```json
+{
+  "name": "EF Core",
+  "description": "Estudar migrations, relacionamentos e tracking.",
+  "weekday": "Friday"
+}
+```
+
+Valores aceitos para `weekday`: `Sunday`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`.
 
 Exemplo de progresso:
 

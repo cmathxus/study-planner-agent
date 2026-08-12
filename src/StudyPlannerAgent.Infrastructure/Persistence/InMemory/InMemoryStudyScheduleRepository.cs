@@ -25,4 +25,35 @@ public sealed class InMemoryStudyScheduleRepository : IStudyScheduleRepository
 
         return Task.FromResult<IReadOnlyCollection<StudySchedule>>(schedules);
     }
+
+    public Task<StudySchedule?> GetByTopicIdAsync(Guid topicId, CancellationToken cancellationToken)
+    {
+        var schedule = _data.StudySchedules.FirstOrDefault(candidate => candidate.StudyTopicId == topicId);
+
+        return Task.FromResult(schedule);
+    }
+
+    public Task AddAsync(StudySchedule schedule, CancellationToken cancellationToken)
+    {
+        _data.StudySchedules.Add(schedule);
+
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(StudySchedule schedule, CancellationToken cancellationToken)
+    {
+        var index = _data.StudySchedules.FindIndex(candidate => candidate.Id == schedule.Id);
+
+        if (index >= 0)
+            _data.StudySchedules[index] = schedule;
+
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteByTopicIdAsync(Guid topicId, CancellationToken cancellationToken)
+    {
+        _data.StudySchedules.RemoveAll(schedule => schedule.StudyTopicId == topicId);
+
+        return Task.CompletedTask;
+    }
 }

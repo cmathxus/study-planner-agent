@@ -33,6 +33,45 @@ Accept: application/json
 
 ###
 
+GET {{StudyPlannerAgent.Api_HostAddress}}/study-topics
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+
+# @name createTopic
+POST {{StudyPlannerAgent.Api_HostAddress}}/study-topics
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "EF Core",
+  "description": "Estudar migrations, relacionamentos e tracking.",
+  "weekday": "Friday"
+}
+
+###
+
+@topicId = {{createTopic.response.body.$.id}}
+
+PUT {{StudyPlannerAgent.Api_HostAddress}}/study-topics/{{topicId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "EF Core",
+  "description": "Estudar migrations, tracking e queries.",
+  "weekday": "Saturday"
+}
+
+###
+
+DELETE {{StudyPlannerAgent.Api_HostAddress}}/study-topics/{{topicId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+
 POST {{StudyPlannerAgent.Api_HostAddress}}/progress
 Authorization: Bearer {{token}}
 Content-Type: application/json

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -7,6 +8,7 @@ using StudyPlannerAgent.Application.Abstractions;
 using StudyPlannerAgent.Application.Auth;
 using StudyPlannerAgent.Application.Progress;
 using StudyPlannerAgent.Application.StudyPlans;
+using StudyPlannerAgent.Application.StudyTopics;
 using StudyPlannerAgent.Domain.Common;
 using StudyPlannerAgent.Infrastructure.Auth;
 using StudyPlannerAgent.Infrastructure.Clock;
@@ -37,6 +39,11 @@ if (string.IsNullOrWhiteSpace(jwtOptions.Secret))
 
 builder.Services.AddScoped<GetTodayStudyPlanUseCase>();
 builder.Services.AddScoped<GetWeeklyStudyScheduleUseCase>();
+builder.Services.AddScoped<GetStudyTopicsUseCase>();
+builder.Services.AddScoped<GetStudyTopicByIdUseCase>();
+builder.Services.AddScoped<CreateStudyTopicUseCase>();
+builder.Services.AddScoped<UpdateStudyTopicUseCase>();
+builder.Services.AddScoped<DeleteStudyTopicUseCase>();
 builder.Services.AddScoped<RecordStudyProgressUseCase>();
 builder.Services.AddScoped<GetProgressSummaryUseCase>();
 builder.Services.AddScoped<RegisterUserUseCase>();
@@ -127,6 +134,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 var app = builder.Build();
@@ -206,6 +214,58 @@ studyPlan.MapGet("/week", async (GetWeeklyStudyScheduleUseCase useCase, Cancella
     return ToOkResult(result);
 });
 
+var studyTopics = app.MapGroup("/study-topics").RequireAuthorization();
+
+studyTopics.MapGet("/", async (GetStudyTopicsUseCase useCase, CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(cancellationToken);
+
+    return ToOkResult(result);
+});
+
+studyTopics.MapGet("/{id:guid}", async (
+    Guid id,
+    GetStudyTopicByIdUseCase useCase,
+    CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(id, cancellationToken);
+
+    return ToOkResult(result);
+});
+
+studyTopics.MapPost("/", async (
+    CreateStudyTopicRequest request,
+    CreateStudyTopicUseCase useCase,
+    CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(request, cancellationToken);
+
+    return result.IsSuccess
+        ? Results.Created($"/study-topics/{result.Value.Id}", result.Value)
+        : ToErrorResult(result.Error);
+});
+
+studyTopics.MapPut("/{id:guid}", async (
+    Guid id,
+    UpdateStudyTopicRequest request,
+    UpdateStudyTopicUseCase useCase,
+    CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(id, request, cancellationToken);
+
+    return ToOkResult(result);
+});
+
+studyTopics.MapDelete("/{id:guid}", async (
+    Guid id,
+    DeleteStudyTopicUseCase useCase,
+    CancellationToken cancellationToken) =>
+{
+    var result = await useCase.ExecuteAsync(id, cancellationToken);
+
+    return ToNoContentResult(result);
+});
+
 app.MapPost("/progress", async (
     ClaimsPrincipal user,
     RecordProgressRequest request,
@@ -243,14 +303,23 @@ static IResult ToNoContentResult(Result result)
 {
     return result.IsSuccess
         ? Results.NoContent()
-        : Results.BadRequest(new { result.Error.Code, result.Error.Message });
+        : ToErrorResult(result.Error);
 }
 
 static IResult ToOkResult<T>(Result<T> result)
 {
     return result.IsSuccess
         ? Results.Ok(result.Value)
-        : Results.BadRequest(new { result.Error.Code, result.Error.Message });
+        : ToErrorResult(result.Error);
+}
+
+static IResult ToErrorResult(Error error)
+{
+    var response = new { error.Code, error.Message };
+
+    return error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+        ? Results.NotFound(response)
+        : Results.BadRequest(response);
 }
 
 static Result<Guid> GetUserId(ClaimsPrincipal user)

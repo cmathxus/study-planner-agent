@@ -23,6 +23,6 @@ public sealed class StudyTopic
         if (string.IsNullOrWhiteSpace(name))
             return Result<StudyTopic>.Failure(new Error("StudyTopic.EmptyName", "Study topic name cannot be empty."));
 
-        return Result<StudyTopic>.Success(new StudyTopic(id, name.Trim(), description.Trim()));
+        return Result<StudyTopic>.Success(new StudyTopic(id, name.Trim(), description?.Trim() ?? string.Empty));
     }
 }

@@ -23,4 +23,28 @@ public sealed class InMemoryStudyTopicRepository : IStudyTopicRepository
 
         return Task.FromResult(topic);
     }
+
+    public Task AddAsync(StudyTopic topic, CancellationToken cancellationToken)
+    {
+        _data.StudyTopics.Add(topic);
+
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(StudyTopic topic, CancellationToken cancellationToken)
+    {
+        var index = _data.StudyTopics.FindIndex(candidate => candidate.Id == topic.Id);
+
+        if (index >= 0)
+            _data.StudyTopics[index] = topic;
+
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        _data.StudyTopics.RemoveAll(topic => topic.Id == id);
+
+        return Task.CompletedTask;
+    }
 }

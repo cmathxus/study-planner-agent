@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StudyPlannerAgent.Application.Abstractions;
 using StudyPlannerAgent.Domain.Entities;
+using StudyPlannerAgent.Infrastructure.Persistence.EfCore.Records;
 
 namespace StudyPlannerAgent.Infrastructure.Persistence.EfCore;
 
@@ -30,5 +31,38 @@ public sealed class EfStudyTopicRepository : IStudyTopicRepository
             .FirstOrDefaultAsync(candidate => candidate.Id == id, cancellationToken);
 
         return topic is null ? null : StudyTopic.Create(topic.Id, topic.Name, topic.Description).Value;
+    }
+
+    public async Task AddAsync(StudyTopic topic, CancellationToken cancellationToken)
+    {
+        _dbContext.StudyTopics.Add(new StudyTopicRecord
+        {
+            Id = topic.Id,
+            Name = topic.Name,
+            Description = topic.Description
+        });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(StudyTopic topic, CancellationToken cancellationToken)
+    {
+        var topicRecord = await _dbContext.StudyTopics
+            .FirstOrDefaultAsync(candidate => candidate.Id == topic.Id, cancellationToken);
+
+        if (topicRecord is null)
+            return;
+
+        topicRecord.Name = topic.Name;
+        topicRecord.Description = topic.Description;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        await _dbContext.StudyTopics
+            .Where(topic => topic.Id == id)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 }

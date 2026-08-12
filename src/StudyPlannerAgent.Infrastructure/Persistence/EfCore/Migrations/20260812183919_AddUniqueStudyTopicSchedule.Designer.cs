@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudyPlannerAgent.Infrastructure.Persistence.EfCore;
@@ -11,9 +12,11 @@ using StudyPlannerAgent.Infrastructure.Persistence.EfCore;
 namespace StudyPlannerAgent.Infrastructure.Persistence.EfCore.Migrations
 {
     [DbContext(typeof(StudyPlannerDbContext))]
-    partial class StudyPlannerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812183919_AddUniqueStudyTopicSchedule")]
+    partial class AddUniqueStudyTopicSchedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
