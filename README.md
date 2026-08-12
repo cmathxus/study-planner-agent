@@ -23,6 +23,12 @@ src/
 dotnet run --project src/StudyPlannerAgent.Api/StudyPlannerAgent.Api.csproj --urls http://localhost:5090
 ```
 
+Swagger:
+
+```text
+http://localhost:5090/swagger
+```
+
 Endpoints iniciais:
 
 ```text
