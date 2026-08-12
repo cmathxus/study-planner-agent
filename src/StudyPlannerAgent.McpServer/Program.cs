@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyPlannerAgent.Application.Abstractions;
 using StudyPlannerAgent.Application.Progress;
 using StudyPlannerAgent.Application.StudyPlans;
+using StudyPlannerAgent.Application.StudyTopics;
 using StudyPlannerAgent.Infrastructure.Clock;
 using StudyPlannerAgent.Infrastructure.Persistence.EfCore;
 using StudyPlannerAgent.Infrastructure.Persistence.InMemory;
@@ -10,6 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<GetTodayStudyPlanUseCase>();
 builder.Services.AddScoped<GetWeeklyStudyScheduleUseCase>();
+builder.Services.AddScoped<GetStudyTopicsUseCase>();
+builder.Services.AddScoped<GetStudyTopicByIdUseCase>();
+builder.Services.AddScoped<CreateStudyTopicUseCase>();
+builder.Services.AddScoped<UpdateStudyTopicUseCase>();
+builder.Services.AddScoped<DeleteStudyTopicUseCase>();
 builder.Services.AddScoped<RecordStudyProgressUseCase>();
 builder.Services.AddScoped<GetProgressSummaryUseCase>();
 

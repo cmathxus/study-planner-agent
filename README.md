@@ -95,11 +95,17 @@ O MCP Server expoe tools para um agente chamar:
 ```text
 get_today_study_plan
 get_weekly_study_schedule
+get_study_topics
+get_study_topic_by_id
+create_study_topic
+update_study_topic
+delete_study_topic
 record_study_progress
 get_progress_summary
 ```
 
-As tools que consultam ou registram progresso recebem `userId` como parametro.
+As tools recebem `userId` como parametro direto. Por enquanto, os topicos ainda sao globais,
+mas o contrato ja fica preparado para evoluir para topicos por usuario.
 
 ## Supabase + EF Core
 
