@@ -16,8 +16,11 @@ builder.Services.AddScoped<GetProgressSummaryUseCase>();
 builder.Services.AddSingleton<IClock, SystemClock>();
 
 var connectionString = builder.Configuration.GetConnectionString("Supabase");
+var normalizedConnectionString = string.IsNullOrWhiteSpace(connectionString)
+    ? null
+    : PostgresConnectionString.Normalize(connectionString);
 
-if (string.IsNullOrWhiteSpace(connectionString))
+if (string.IsNullOrWhiteSpace(normalizedConnectionString))
 {
     builder.Services.AddSingleton<InMemoryStudyData>();
     builder.Services.AddSingleton<IStudyTopicRepository, InMemoryStudyTopicRepository>();
@@ -28,7 +31,7 @@ else
 {
     builder.Services.AddDbContext<StudyPlannerDbContext>(options =>
     {
-        options.UseNpgsql(connectionString);
+        options.UseNpgsql(normalizedConnectionString);
     });
 
     builder.Services.AddScoped<IStudyTopicRepository, EfStudyTopicRepository>();
@@ -46,7 +49,7 @@ builder.Services
 
 var app = builder.Build();
 
-if (!string.IsNullOrWhiteSpace(connectionString))
+if (!string.IsNullOrWhiteSpace(normalizedConnectionString))
 {
     await StudyPlannerDbInitializer.ApplyMigrationsAsync(app.Services);
 }

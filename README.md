@@ -88,6 +88,12 @@ Por padrao, o projeto usa dados em memoria. Para usar Supabase/Postgres:
 $env:ConnectionStrings__Supabase="postgresql://postgres:<password>@<host>:5432/postgres"
 ```
 
+Tambem funciona no formato do Npgsql:
+
+```powershell
+$env:ConnectionStrings__Supabase="Host=<host>;Port=5432;Database=postgres;Username=postgres;Password=<password>;SSL Mode=Require"
+```
+
 2. Configure uma chave JWT fora do Git para deploy:
 
 ```powershell

@@ -11,7 +11,7 @@ public sealed class StudyPlannerDbContextFactory : IDesignTimeDbContextFactory<S
             ?? "Host=localhost;Database=study_planner_agent;Username=postgres;Password=postgres";
 
         var options = new DbContextOptionsBuilder<StudyPlannerDbContext>()
-            .UseNpgsql(connectionString)
+            .UseNpgsql(PostgresConnectionString.Normalize(connectionString))
             .Options;
 
         return new StudyPlannerDbContext(options);

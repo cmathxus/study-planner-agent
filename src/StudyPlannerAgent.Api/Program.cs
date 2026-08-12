@@ -47,8 +47,11 @@ builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
 var connectionString = builder.Configuration.GetConnectionString("Supabase");
+var normalizedConnectionString = string.IsNullOrWhiteSpace(connectionString)
+    ? null
+    : PostgresConnectionString.Normalize(connectionString);
 
-if (string.IsNullOrWhiteSpace(connectionString))
+if (string.IsNullOrWhiteSpace(normalizedConnectionString))
 {
     builder.Services.AddSingleton<InMemoryStudyData>();
     builder.Services.AddSingleton<IStudyTopicRepository, InMemoryStudyTopicRepository>();
@@ -60,7 +63,7 @@ else
 {
     builder.Services.AddDbContext<StudyPlannerDbContext>(options =>
     {
-        options.UseNpgsql(connectionString);
+        options.UseNpgsql(normalizedConnectionString);
     });
 
     builder.Services.AddScoped<IStudyTopicRepository, EfStudyTopicRepository>();
@@ -94,7 +97,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 var app = builder.Build();
 
-if (!string.IsNullOrWhiteSpace(connectionString))
+if (!string.IsNullOrWhiteSpace(normalizedConnectionString))
 {
     await StudyPlannerDbInitializer.ApplyMigrationsAsync(app.Services);
 }
