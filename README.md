@@ -1,10 +1,19 @@
 # Study Planner Agent
 
-Projeto de estudo para aprender .NET, Clean Architecture, MCP e a base para uma futura integracao com Microsoft Foundry.
+Projeto de estudo com .NET, Microsoft Foundry, MCP e Supabase.
 
-## Ideia
+A ideia é simples: um planner de estudos onde o usuário cadastra tópicos por dia da semana e registra o progresso dos estudos.
 
-Um planner de estudos semanal onde cada dia tem um topico principal. Ao registrar estudo, o progresso minimo diario precisa ser de 20%.
+## Stack
+
+- .NET 9
+- ASP.NET Core
+- EF Core
+- PostgreSQL / Supabase
+- JWT
+- MCP Server
+- Microsoft Foundry
+- Azure Container Apps
 
 ## Projetos
 
@@ -17,111 +26,52 @@ src/
   StudyPlannerAgent.McpServer
 ```
 
-## Rodar API
+## API
 
 ```bash
-dotnet run --project src/StudyPlannerAgent.Api/StudyPlannerAgent.Api.csproj --urls http://localhost:5090
+dotnet run --project src/StudyPlannerAgent.Api
 ```
 
 Swagger:
 
 ```text
-http://localhost:5090/swagger
+http://localhost:5082/swagger
 ```
 
-Endpoints iniciais:
+Principais endpoints:
 
 ```text
-POST /auth/register
-POST /auth/login
-GET  /auth/me
-POST /chat
-GET  /study-topics
-GET  /study-topics/{id}
-POST /study-topics
-PUT  /study-topics/{id}
+POST   /auth/register
+POST   /auth/login
+GET    /auth/me
+
+GET    /study-topics
+POST   /study-topics
+PUT    /study-topics/{id}
 DELETE /study-topics/{id}
-GET  /study-plan/today
-GET  /study-plan/week
-POST /progress
-GET  /progress/summary
+
+GET    /study-plan/today
+GET    /study-plan/week
+
+POST   /progress
+GET    /progress/summary
+
+POST   /chat
 ```
 
-Os endpoints de estudo usam JWT. Primeiro registre ou faca login:
-
-```json
-{
-  "name": "Caio Matheus",
-  "email": "caio@example.com",
-  "password": "password123"
-}
-```
-
-Use o `access_token` retornado no header:
-
-```text
-Authorization: Bearer <access_token>
-```
-
-Exemplo de topico:
-
-```json
-{
-  "name": "EF Core",
-  "description": "Estudar migrations, relacionamentos e tracking.",
-  "weekday": "Friday"
-}
-```
-
-Valores aceitos para `weekday`: `Sunday`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`.
-
-Exemplo de progresso:
-
-```json
-{
-  "topic_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
-  "percentage": 20,
-  "notes": "Revisei LINQ e async/await."
-}
-```
-
-Exemplo de chat:
-
-```json
-{
-  "message": "Cria um topico de Docker para sexta-feira",
-  "thread_id": null
-}
-```
-
-Use o `thread_id` retornado para continuar a mesma conversa.
-
-## Microsoft Foundry Agent
-
-O endpoint `/chat` chama um agente do Microsoft Foundry usando `DefaultAzureCredential`.
-Localmente, faca login no Azure CLI:
-
-```powershell
-az login
-```
-
-Configure fora do Git:
-
-```powershell
-$env:Foundry__Endpoint="https://study-agent-mcp.services.ai.azure.com/"
-$env:Foundry__AgentId="<agent-id>"
-```
-
-O `Foundry__Endpoint` e o endpoint do projeto/agente no Foundry. O `Foundry__AgentId`
-vem do agente criado no portal.
-
-## Rodar MCP Server
+## MCP Server
 
 ```bash
-dotnet run --project src/StudyPlannerAgent.McpServer/StudyPlannerAgent.McpServer.csproj --urls http://localhost:5091
+dotnet run --project src/StudyPlannerAgent.McpServer --urls http://localhost:5091
 ```
 
-O MCP Server expoe tools para um agente chamar:
+Endpoint:
+
+```text
+http://localhost:5091/mcp
+```
+
+Tools disponíveis:
 
 ```text
 get_today_study_plan
@@ -135,18 +85,34 @@ record_study_progress
 get_progress_summary
 ```
 
-As tools recebem `userId` como parametro direto. Por enquanto, os topicos ainda sao globais,
-mas o contrato ja fica preparado para evoluir para topicos por usuario.
+## Variáveis de ambiente
 
-### Docker do MCP Server
+Supabase:
 
-Build usando a raiz do repositorio como contexto:
+```powershell
+$env:ConnectionStrings__Supabase="postgresql://postgres:<password>@<host>:5432/postgres"
+```
+
+JWT:
+
+```powershell
+$env:Jwt__Secret="<secret>"
+```
+
+Foundry:
+
+```powershell
+$env:Foundry__Endpoint="<foundry-endpoint>"
+$env:Foundry__AgentId="<agent-id>"
+```
+
+Se `ConnectionStrings__Supabase` não for informada, o projeto usa dados em memória.
+
+## Docker MCP
 
 ```bash
 docker build -f src/StudyPlannerAgent.McpServer/Dockerfile -t study-planner-mcp .
 ```
-
-Run local:
 
 ```bash
 docker run --rm -p 5091:8080 \
@@ -154,71 +120,6 @@ docker run --rm -p 5091:8080 \
   study-planner-mcp
 ```
 
-Deploy no Azure Container Apps:
+## Objetivo
 
-```powershell
-$env:ConnectionStrings__Supabase="sua-connection-string-do-supabase"
-
-.\infra\azure\deploy-mcp-containerapp.ps1
-```
-
-O script cria:
-
-```text
-Resource Group
-Azure Container Registry
-Container Apps Environment
-Container App do MCP Server
-```
-
-Ao final, ele imprime:
-
-```text
-https://<container-app-fqdn>/health
-https://<container-app-fqdn>/mcp
-```
-
-## Supabase + EF Core
-
-Por padrao, o projeto usa dados em memoria. Para usar Supabase/Postgres:
-
-1. Configure a connection string fora do Git:
-
-```powershell
-$env:ConnectionStrings__Supabase="postgresql://postgres:<password>@<host>:5432/postgres"
-```
-
-Tambem funciona no formato do Npgsql:
-
-```powershell
-$env:ConnectionStrings__Supabase="Host=<host>;Port=5432;Database=postgres;Username=postgres;Password=<password>;SSL Mode=Require"
-```
-
-2. Configure uma chave JWT fora do Git para deploy:
-
-```powershell
-$env:Jwt__Secret="use-uma-chave-grande-e-segura-aqui"
-```
-
-3. Rode a API ou o MCP Server normalmente.
-
-O EF Core aplica as migrations automaticamente quando a connection string existe.
-Se `ConnectionStrings__Supabase` nao existir, o projeto volta para os repositorios em memoria.
-
-Se voce ja criou as tabelas antigas manualmente no Supabase, limpe essas tabelas antes de rodar a API com EF Core.
-
-## Padroes usados
-
-- Clean Architecture: separa dominio, casos de uso, infraestrutura e entradas externas.
-- SOLID: os casos de uso dependem de interfaces, nao de banco ou framework.
-- Result Pattern: erros esperados voltam como resultado, sem usar exception para fluxo comum.
-- Repository Pattern: persistencia fica atras de interfaces.
-- EF Core: mapeia as entidades de persistencia para Postgres/Supabase sem SQL na mao.
-- Value Object: `ProgressPercentage` valida a regra de progresso minimo.
-- Ports and Adapters: REST API e MCP Server sao portas diferentes usando a mesma aplicacao.
-- JWT Authentication: usuarios fazem login e recebem token para acessar recursos protegidos.
-- Password Hashing: senhas sao armazenadas com hash BCrypt.
-
-## Proximo passo
-
-Adicionar testes de integracao.
+Esse projeto foi criado para estudar, na prática, como uma API em .NET pode ser integrada com um agente do Microsoft Foundry usando MCP.
