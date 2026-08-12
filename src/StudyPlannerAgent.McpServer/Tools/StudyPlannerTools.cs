@@ -135,12 +135,21 @@ public sealed class StudyPlannerTools
     [Description("Records a study progress entry. The percentage must be at least 20.")]
     public async Task<object> RecordStudyProgress(Guid userId, Guid topicId, int percentage, string? notes, CancellationToken cancellationToken)
     {
-        var result = await _recordStudyProgressUseCase.ExecuteAsync(
-            userId,
-            new RecordProgressRequest(topicId, percentage, notes),
-            cancellationToken);
+        try
+        {
+            var result = await _recordStudyProgressUseCase.ExecuteAsync(
+                userId,
+                new RecordProgressRequest(topicId, percentage, notes),
+                cancellationToken);
 
-        return result.IsSuccess ? "Progress recorded." : result.Error;
+            return result.IsSuccess ? "Progress recorded." : result.Error;
+        }
+        catch (Exception exception)
+        {
+            return new Error(
+                "StudyProgress.UnexpectedError",
+                exception.GetBaseException().Message);
+        }
     }
 
     [McpServerTool]
