@@ -32,6 +32,7 @@ if (string.IsNullOrWhiteSpace(normalizedConnectionString))
     builder.Services.AddSingleton<IStudyTopicRepository, InMemoryStudyTopicRepository>();
     builder.Services.AddSingleton<IStudyScheduleRepository, InMemoryStudyScheduleRepository>();
     builder.Services.AddSingleton<IStudyProgressRepository, InMemoryStudyProgressRepository>();
+    builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
 }
 else
 {
@@ -43,6 +44,7 @@ else
     builder.Services.AddScoped<IStudyTopicRepository, EfStudyTopicRepository>();
     builder.Services.AddScoped<IStudyScheduleRepository, EfStudyScheduleRepository>();
     builder.Services.AddScoped<IStudyProgressRepository, EfStudyProgressRepository>();
+    builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 }
 
 builder.Services

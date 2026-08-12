@@ -9,19 +9,27 @@ public sealed class RecordStudyProgressUseCase
     private readonly IClock _clock;
     private readonly IStudyProgressRepository _progressRepository;
     private readonly IStudyTopicRepository _topicRepository;
+    private readonly IUserRepository _userRepository;
 
     public RecordStudyProgressUseCase(
         IClock clock,
         IStudyProgressRepository progressRepository,
-        IStudyTopicRepository topicRepository)
+        IStudyTopicRepository topicRepository,
+        IUserRepository userRepository)
     {
         _clock = clock;
         _progressRepository = progressRepository;
         _topicRepository = topicRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<Result> ExecuteAsync(Guid userId, RecordProgressRequest request, CancellationToken cancellationToken)
     {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+
+        if (user is null)
+            return Result.Failure(new Error("User.NotFound", "User was not found."));
+
         var topic = await _topicRepository.GetByIdAsync(request.TopicId, cancellationToken);
 
         if (topic is null)
